@@ -59,3 +59,17 @@ The fixed staged baseline is defined through the frozen primary budget `B=2`.
 No additional third-step action-type ordering is inferred for the secondary
 `B=3` analysis.
 
+Stage-26 runtime optimization preserves that policy behavior. The shared
+`PolicyComputationCache` is keyed only by observable pair state: recipe
+identity, selected-rank disclosure intervals, current factor intervals,
+observed-variable markers, budget, and spent cost. Latent world values are
+absent until an acquisition has updated the observable state.
+
+The cache reuses immutable rank-slab vertices, pair-local action sets, robust
+state values, one-step scores, and complete policy decisions. Consequently an
+initial decision can be reused across latent worlds when its observable state
+is identical, while an acquired share or factor value produces a distinct key.
+Cache-disabled execution remains available for semantic parity tests.
+Evaluation runners should scope a shared cache to one recipe pair across its
+regimes and worlds, then discard it before the next pair to bound memory use.
+

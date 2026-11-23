@@ -8,13 +8,18 @@ the separate execution layer only after a policy returns an action.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from math import isclose
 
 import numpy as np
+from numpy.typing import NDArray
 
-from food_carbon_cert.certification import Decision
+from food_carbon_cert.certification import (
+    Decision,
+    calculate_robust_bounds,
+    classify_bounds,
+)
 from food_carbon_cert.geometry import one_rank_slab_vertices
 
 from .preflight import StartingShareRegime
@@ -26,7 +31,6 @@ from .state import (
     Stage26FoodState,
     Stage26PairState,
     apply_observation,
-    certify_stage26_state,
 )
 
 EXPECTATION_NODE_COUNT = 9
@@ -120,6 +124,44 @@ class BaselineChampion:
         return len(self.tied_policy_ids) > 1
 
 
+StateCacheKey = tuple[object, ...]
+FoodGeometryKey = tuple[object, ...]
+DecisionCacheKey = tuple[PolicyId, StartingShareRegime, StateCacheKey]
+
+
+@dataclass(slots=True)
+class PolicyComputationCache:
+    """Observable-state-only memoization shared across policy evaluations."""
+
+    enabled: bool = True
+    state_values: dict[StateCacheKey, StateValue] = field(default_factory=dict)
+    available_action_sets: dict[StateCacheKey, tuple[CandidateAction, ...]] = field(
+        default_factory=dict
+    )
+    food_factor_bounds: dict[FoodGeometryKey, dict[str, tuple[float, float]]] = field(
+        default_factory=dict
+    )
+    food_vertices: dict[FoodGeometryKey, NDArray[np.float64]] = field(
+        default_factory=dict
+    )
+    immediate_scores: dict[tuple[StateCacheKey, str], ActionScore] = field(
+        default_factory=dict
+    )
+    decisions: dict[DecisionCacheKey, PolicyDecision | None] = field(
+        default_factory=dict
+    )
+
+    def clear(self) -> None:
+        """Discard all memoized observable-state computations."""
+
+        self.state_values.clear()
+        self.available_action_sets.clear()
+        self.food_factor_bounds.clear()
+        self.food_vertices.clear()
+        self.immediate_scores.clear()
+        self.decisions.clear()
+
+
 def canonical_action_id(action: Stage26Action, state: Stage26PairState) -> str:
     """Return the frozen canonical identifier for an acquisition."""
 
@@ -129,15 +171,28 @@ def canonical_action_id(action: Stage26Action, state: Stage26PairState) -> str:
     return f"factor:{action.factor_key}"
 
 
+def _food_geometry_key(food: Stage26FoodState) -> FoodGeometryKey:
+    return (
+        food.recipe_id,
+        food.factor_keys,
+        food.selected_rank,
+        str(food.share_interval.lower),
+        str(food.share_interval.upper),
+        food.share_interval.lower_included,
+        food.share_interval.upper_included,
+    )
+
+
 def _food_key_share_bounds(
     food: Stage26FoodState,
+    cache: PolicyComputationCache | None = None,
 ) -> dict[str, tuple[float, float]]:
-    vertices = one_rank_slab_vertices(
-        len(food.factor_keys),
-        food.selected_rank,
-        float(food.share_interval.lower),
-        float(food.share_interval.upper),
-    )
+    cache_key = _food_geometry_key(food)
+    if cache is not None and cache.enabled:
+        cached = cache.food_factor_bounds.get(cache_key)
+        if cached is not None:
+            return cached
+    vertices = _food_vertices(food, cache)
     bounds: dict[str, tuple[float, float]] = {}
     for key in set(food.factor_keys):
         indexes = [
@@ -147,7 +202,29 @@ def _food_key_share_bounds(
         ]
         shares = np.sum(vertices[:, indexes], axis=1)
         bounds[key] = float(np.min(shares)), float(np.max(shares))
+    if cache is not None and cache.enabled:
+        cache.food_factor_bounds[cache_key] = bounds
     return bounds
+
+
+def _food_vertices(
+    food: Stage26FoodState,
+    cache: PolicyComputationCache | None = None,
+) -> NDArray[np.float64]:
+    cache_key = _food_geometry_key(food)
+    if cache is not None and cache.enabled:
+        cached = cache.food_vertices.get(cache_key)
+        if cached is not None:
+            return cached
+    vertices = one_rank_slab_vertices(
+        len(food.factor_keys),
+        food.selected_rank,
+        float(food.share_interval.lower),
+        float(food.share_interval.upper),
+    )
+    if cache is not None and cache.enabled:
+        cache.food_vertices[cache_key] = vertices
+    return vertices
 
 
 def factor_can_affect_comparison(
@@ -155,19 +232,30 @@ def factor_can_affect_comparison(
     factor_key: str,
     *,
     tolerance: float = POLICY_SCORE_TOLERANCE,
+    cache: PolicyComputationCache | None = None,
 ) -> bool:
     """Return whether a factor can have a nonzero current A-minus-B coefficient."""
 
-    lower_a, upper_a = _food_key_share_bounds(state.food_a).get(factor_key, (0.0, 0.0))
-    lower_b, upper_b = _food_key_share_bounds(state.food_b).get(factor_key, (0.0, 0.0))
+    lower_a, upper_a = _food_key_share_bounds(state.food_a, cache).get(
+        factor_key, (0.0, 0.0)
+    )
+    lower_b, upper_b = _food_key_share_bounds(state.food_b, cache).get(
+        factor_key, (0.0, 0.0)
+    )
     coefficient_lower = lower_a - upper_b
     coefficient_upper = upper_a - lower_b
     return coefficient_lower < -tolerance or coefficient_upper > tolerance
 
 
-def available_actions(state: Stage26PairState) -> tuple[CandidateAction, ...]:
+def available_actions(
+    state: Stage26PairState,
+    cache: PolicyComputationCache | None = None,
+) -> tuple[CandidateAction, ...]:
     """Construct only unresolved, pair-relevant Stage-26 actions."""
 
+    state_key = observable_state_key(state)
+    if cache is not None and cache.enabled and state_key in cache.available_action_sets:
+        return cache.available_action_sets[state_key]
     actions: list[CandidateAction] = []
     for side, food in (
         (FoodSide.A, state.food_a),
@@ -183,8 +271,8 @@ def available_actions(state: Stage26PairState) -> tuple[CandidateAction, ...]:
                 )
             )
 
-    bounds_a = _food_key_share_bounds(state.food_a)
-    bounds_b = _food_key_share_bounds(state.food_b)
+    bounds_a = _food_key_share_bounds(state.food_a, cache)
+    bounds_b = _food_key_share_bounds(state.food_b, cache)
     pair_keys = set(bounds_a) | set(bounds_b)
     for key in sorted(pair_keys):
         interval = state.factor_intervals[key]
@@ -207,11 +295,16 @@ def available_actions(state: Stage26PairState) -> tuple[CandidateAction, ...]:
                     factor_acquisition,
                 )
             )
-    return tuple(sorted(actions, key=lambda action: action.action_id))
+    result = tuple(sorted(actions, key=lambda action: action.action_id))
+    if cache is not None and cache.enabled:
+        cache.available_action_sets[state_key] = result
+    return result
 
 
 def expectation_nodes(
-    state: Stage26PairState, action: CandidateAction
+    state: Stage26PairState,
+    action: CandidateAction,
+    cache: PolicyComputationCache | None = None,
 ) -> tuple[ObservationNode, ...]:
     """Return the frozen nine midpoint-quantile nodes for one action."""
 
@@ -243,18 +336,15 @@ def expectation_nodes(
         share_acquisition = action.acquisition
         if not isinstance(share_acquisition, ShareAcquisition):
             raise TypeError("share candidate must contain a share acquisition")
-        share_food = (
-            state.food_a if share_acquisition.side is FoodSide.A else state.food_b
-        )
         for node in nodes:
             try:
-                apply_observation(state, action.acquisition, node.value)
-                one_rank_slab_vertices(
-                    len(share_food.factor_keys),
-                    share_food.selected_rank,
-                    node.value,
-                    node.value,
+                hypothetical = apply_observation(state, action.acquisition, node.value)
+                share_food = (
+                    hypothetical.food_a
+                    if share_acquisition.side is FoodSide.A
+                    else hypothetical.food_b
                 )
+                _food_vertices(share_food, cache)
             except ValueError as error:
                 raise AssertionError(
                     f"infeasible prospective share node for {action.action_id}: "
@@ -263,17 +353,36 @@ def expectation_nodes(
     return nodes
 
 
-def state_value(state: Stage26PairState) -> StateValue:
+def state_value(
+    state: Stage26PairState,
+    cache: PolicyComputationCache | None = None,
+) -> StateValue:
     """Return the frozen binary certificate value and robust interval width."""
 
-    result = certify_stage26_state(state)
-    return StateValue(
-        result.decision is not Decision.ABSTAIN,
-        result.upper_bound - result.lower_bound,
+    key = observable_state_key(state)
+    if cache is not None and cache.enabled:
+        cached = cache.state_values.get(key)
+        if cached is not None:
+            return cached
+    bounds = calculate_robust_bounds(
+        _food_vertices(state.food_a, cache),
+        state.food_a.factor_keys,
+        _food_vertices(state.food_b, cache),
+        state.food_b.factor_keys,
+        state.factor_intervals,
     )
+    value = StateValue(
+        classify_bounds(bounds.lower, bounds.upper) is not Decision.ABSTAIN,
+        bounds.upper - bounds.lower,
+    )
+    if cache is not None and cache.enabled:
+        cache.state_values[key] = value
+    return value
 
 
-def _state_cache_key(state: Stage26PairState) -> tuple[object, ...]:
+def observable_state_key(state: Stage26PairState) -> StateCacheKey:
+    """Return a cache key containing observable uncertainty state only."""
+
     def food_key(food: Stage26FoodState) -> tuple[object, ...]:
         return (
             food.recipe_id,
@@ -299,39 +408,37 @@ def _state_cache_key(state: Stage26PairState) -> tuple[object, ...]:
     )
 
 
-def _cached_state_value(
-    state: Stage26PairState,
-    cache: dict[tuple[object, ...], StateValue],
-) -> StateValue:
-    key = _state_cache_key(state)
-    result = cache.get(key)
-    if result is None:
-        result = state_value(state)
-        cache[key] = result
-    return result
-
-
 def score_immediate_action(
-    state: Stage26PairState, action: CandidateAction
+    state: Stage26PairState,
+    action: CandidateAction,
+    cache: PolicyComputationCache | None = None,
 ) -> ActionScore:
     """Score one action under the common frozen nine-node model."""
 
-    current = state_value(state)
+    key = (observable_state_key(state), action.action_id)
+    if cache is not None and cache.enabled:
+        cached = cache.immediate_scores.get(key)
+        if cached is not None:
+            return cached
+    current = state_value(state, cache)
     expected_certification = 0.0
     expected_width = 0.0
-    for node in expectation_nodes(state, action):
+    for node in expectation_nodes(state, action, cache):
         hypothetical = apply_observation(
             state, action.acquisition, observed_value=node.value
         )
-        value = state_value(hypothetical)
+        value = state_value(hypothetical, cache)
         expected_certification += node.weight * float(value.certified)
         expected_width += node.weight * value.width
-    return ActionScore(
+    score = ActionScore(
         action,
         expected_certification,
         expected_width,
         current.width - expected_width,
     )
+    if cache is not None and cache.enabled:
+        cache.immediate_scores[key] = score
+    return score
 
 
 def _equal(left: float, right: float) -> bool:
@@ -369,8 +476,10 @@ def _select_score(
     return selected, len(final_ties)
 
 
-def _already_terminal(state: Stage26PairState) -> bool:
-    return state.remaining_budget == 0 or state_value(state).certified
+def _already_terminal(
+    state: Stage26PairState, cache: PolicyComputationCache | None = None
+) -> bool:
+    return state.remaining_budget == 0 or state_value(state, cache).certified
 
 
 class ImmediatePolicy:
@@ -381,28 +490,48 @@ class ImmediatePolicy:
     primary_score_field = "expected_certification"
     secondary_score_field = "expected_width_reduction"
 
+    def __init__(
+        self, cache: PolicyComputationCache | None = None, *, cache_enabled: bool = True
+    ) -> None:
+        self.cache = (
+            PolicyComputationCache(enabled=cache_enabled) if cache is None else cache
+        )
+
     def choose_action(
         self, state: Stage26PairState, regime: StartingShareRegime
     ) -> PolicyDecision | None:
-        del regime
-        if _already_terminal(state):
-            return None
-        candidates = available_actions(state)
+        decision_key = (self.policy_id, regime, observable_state_key(state))
+        if self.cache.enabled and decision_key in self.cache.decisions:
+            return self.cache.decisions[decision_key]
+        if _already_terminal(state, self.cache):
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
+        candidates = available_actions(state, self.cache)
         if self.allowed_kind is not None:
             candidates = tuple(
                 action for action in candidates if action.kind is self.allowed_kind
             )
         if not candidates:
-            return None
-        scores = tuple(score_immediate_action(state, action) for action in candidates)
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
+        scores = tuple(
+            score_immediate_action(state, action, self.cache) for action in candidates
+        )
         selected, tie_count = _select_score(
             scores,
             primary=self.primary_score_field,
             secondary=self.secondary_score_field,
         )
-        return PolicyDecision(
+        decision = PolicyDecision(
             self.policy_id, selected.action, selected, scores, tie_count
         )
+        if self.cache.enabled:
+            self.cache.decisions[decision_key] = decision
+        return decision
 
 
 class B0ShareOnly(ImmediatePolicy):
@@ -430,11 +559,24 @@ class B2FixedStaged:
 
     policy_id = PolicyId.B2_FIXED_STAGED
 
+    def __init__(
+        self, cache: PolicyComputationCache | None = None, *, cache_enabled: bool = True
+    ) -> None:
+        self.cache = (
+            PolicyComputationCache(enabled=cache_enabled) if cache is None else cache
+        )
+
     def choose_action(
         self, state: Stage26PairState, regime: StartingShareRegime
     ) -> PolicyDecision | None:
-        if _already_terminal(state):
-            return None
+        decision_key = (self.policy_id, regime, observable_state_key(state))
+        if self.cache.enabled and decision_key in self.cache.decisions:
+            return self.cache.decisions[decision_key]
+        if _already_terminal(state, self.cache):
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
         if state.spent >= 2:
             raise ValueError("the frozen B2 type sequence is defined only through B=2")
         share_first = regime in {
@@ -447,7 +589,7 @@ class B2FixedStaged:
             if share_first
             else (ActionKind.FACTOR, ActionKind.SHARE)
         )
-        candidates = available_actions(state)
+        candidates = available_actions(state, self.cache)
         preferred = tuple(
             action for action in candidates if action.kind is sequence[state.spent]
         )
@@ -455,16 +597,24 @@ class B2FixedStaged:
             action for action in candidates if action.kind is not sequence[state.spent]
         )
         if not considered:
-            return None
-        scores = tuple(score_immediate_action(state, action) for action in considered)
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
+        scores = tuple(
+            score_immediate_action(state, action, self.cache) for action in considered
+        )
         selected, tie_count = _select_score(
             scores,
             primary="expected_certification",
             secondary="expected_width_reduction",
         )
-        return PolicyDecision(
+        decision = PolicyDecision(
             self.policy_id, selected.action, selected, scores, tie_count
         )
+        if self.cache.enabled:
+            self.cache.decisions[decision_key] = decision
+        return decision
 
 
 def _select_terminal_score(
@@ -490,28 +640,12 @@ def _select_terminal_score(
 def _one_step_terminal_scores(
     state: Stage26PairState,
     *,
-    value_cache: dict[tuple[object, ...], StateValue] | None = None,
+    cache: PolicyComputationCache | None = None,
 ) -> tuple[ActionScore, ...]:
-    cache = {} if value_cache is None else value_cache
-    current = _cached_state_value(state, cache)
-    scores: list[ActionScore] = []
-    for action in available_actions(state):
-        expected_certification = 0.0
-        expected_width = 0.0
-        for node in expectation_nodes(state, action):
-            terminal = apply_observation(state, action.acquisition, node.value)
-            value = _cached_state_value(terminal, cache)
-            expected_certification += node.weight * float(value.certified)
-            expected_width += node.weight * value.width
-        scores.append(
-            ActionScore(
-                action,
-                expected_certification,
-                expected_width,
-                current.width - expected_width,
-            )
-        )
-    return tuple(scores)
+    return tuple(
+        score_immediate_action(state, action, cache)
+        for action in available_actions(state, cache)
+    )
 
 
 class OasaTwoStep:
@@ -519,41 +653,56 @@ class OasaTwoStep:
 
     policy_id = PolicyId.P_OASA
 
+    def __init__(
+        self, cache: PolicyComputationCache | None = None, *, cache_enabled: bool = True
+    ) -> None:
+        self.cache = (
+            PolicyComputationCache(enabled=cache_enabled) if cache is None else cache
+        )
+
     def choose_action(
         self, state: Stage26PairState, regime: StartingShareRegime
     ) -> PolicyDecision | None:
-        del regime
-        if _already_terminal(state):
-            return None
+        decision_key = (self.policy_id, regime, observable_state_key(state))
+        if self.cache.enabled and decision_key in self.cache.decisions:
+            return self.cache.decisions[decision_key]
+        if _already_terminal(state, self.cache):
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
         if state.remaining_budget > 2:
             raise ValueError("frozen OASA rollout supports at most two remaining units")
         if state.remaining_budget == 1:
-            scores = _one_step_terminal_scores(state)
+            scores = _one_step_terminal_scores(state, cache=self.cache)
             if not scores:
-                return None
+                decision = None
+                if self.cache.enabled:
+                    self.cache.decisions[decision_key] = decision
+                return decision
             selected, tie_count = _select_terminal_score(scores)
-            return PolicyDecision(
+            decision = PolicyDecision(
                 self.policy_id, selected.action, selected, scores, tie_count
             )
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
 
-        value_cache: dict[tuple[object, ...], StateValue] = {}
-        current = _cached_state_value(state, value_cache)
+        current = state_value(state, self.cache)
         first_scores: list[ActionScore] = []
-        for first_action in available_actions(state):
+        for first_action in available_actions(state, self.cache):
             expected_terminal_certification = 0.0
             expected_terminal_width = 0.0
-            for first_node in expectation_nodes(state, first_action):
+            for first_node in expectation_nodes(state, first_action, self.cache):
                 branch = apply_observation(
                     state, first_action.acquisition, first_node.value
                 )
-                branch_value = _cached_state_value(branch, value_cache)
+                branch_value = state_value(branch, self.cache)
                 if branch_value.certified:
                     terminal_certification = 1.0
                     terminal_width = branch_value.width
                 else:
-                    second_scores = _one_step_terminal_scores(
-                        branch, value_cache=value_cache
-                    )
+                    second_scores = _one_step_terminal_scores(branch, cache=self.cache)
                     if second_scores:
                         best_second, _ = _select_terminal_score(second_scores)
                         terminal_certification = best_second.expected_certification
@@ -575,11 +724,17 @@ class OasaTwoStep:
             )
         scores = tuple(first_scores)
         if not scores:
-            return None
+            decision = None
+            if self.cache.enabled:
+                self.cache.decisions[decision_key] = decision
+            return decision
         selected, tie_count = _select_terminal_score(scores)
-        return PolicyDecision(
+        decision = PolicyDecision(
             self.policy_id, selected.action, selected, scores, tie_count
         )
+        if self.cache.enabled:
+            self.cache.decisions[decision_key] = decision
+        return decision
 
 
 def select_baseline_champion(

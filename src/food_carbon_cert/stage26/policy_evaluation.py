@@ -9,6 +9,7 @@ from typing import Protocol
 from .policies import (
     POLICY_SCORE_TOLERANCE,
     CandidateAction,
+    PolicyComputationCache,
     PolicyDecision,
     PolicyId,
     available_actions,
@@ -28,6 +29,7 @@ class AcquisitionPolicy(Protocol):
     """Implementable policy API, deliberately excluding latent truth."""
 
     policy_id: PolicyId
+    cache: PolicyComputationCache
 
     def choose_action(
         self, state: Stage26PairState, regime: StartingShareRegime
@@ -101,7 +103,7 @@ def run_implementable_policy(
     state = initial_state
     records: list[ExecutedAcquisition] = []
     while state.remaining_budget > 0:
-        current = state_value(state)
+        current = state_value(state, policy.cache)
         if current.certified:
             break
         decision = policy.choose_action(state, regime)
@@ -111,7 +113,7 @@ def run_implementable_policy(
         state = apply_observation(
             state, decision.action.acquisition, observed_value=observed
         )
-        updated = state_value(state)
+        updated = state_value(state, policy.cache)
         records.append(
             ExecutedAcquisition(
                 decision.action.action_id,
@@ -122,7 +124,7 @@ def run_implementable_policy(
                 decision.tied_best_count,
             )
         )
-    terminal = state_value(state)
+    terminal = state_value(state, policy.cache)
     if state.spent > state.budget:
         raise AssertionError("policy execution exceeded its frozen budget")
     return PolicyRun(
@@ -160,6 +162,7 @@ def _better_hindsight(
 def run_hindsight_ceiling(
     initial_state: Stage26PairState,
     observations: LatentObservations,
+    cache: PolicyComputationCache | None = None,
 ) -> PolicyRun:
     """Enumerate the best actual-observation sequence under the same budget."""
 
@@ -167,16 +170,16 @@ def run_hindsight_ceiling(
         state: Stage26PairState,
         records: tuple[ExecutedAcquisition, ...],
     ) -> _HindsightCandidate:
-        current = state_value(state)
+        current = state_value(state, cache)
         best = _HindsightCandidate(state, records, current.certified, current.width)
         if current.certified or state.remaining_budget == 0:
             return best
-        for action in available_actions(state):
+        for action in available_actions(state, cache):
             observed = observations.reveal(action)
             updated = apply_observation(
                 state, action.acquisition, observed_value=observed
             )
-            value = state_value(updated)
+            value = state_value(updated, cache)
             record = ExecutedAcquisition(
                 action.action_id,
                 observed,
