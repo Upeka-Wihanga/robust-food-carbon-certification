@@ -114,3 +114,31 @@ Verified-corpus coverage is:
 Unresolved ingredient-row counts include the 40 rows whose source FCID code is
 missing. Five mapped baby-food/base-parent pairs carry a weight-basis warning;
 no conversion is applied.
+
+## Stage-26 Guan reconstruction
+
+The Stage-26 Guan substrate is a `RECOVERED_PROJECT_CONVENTION`, not recovered
+historical source code. Ingredient dictionaries are parsed from their literal
+workbook text. Quantities and their recipe total remain `Decimal` values for
+the source five-percent classification:
+
+`ingredient_weight >= Decimal("0.05") * parsed_recipe_total`
+
+This exact comparison is required at the threshold: source `15.0 / 300.0` is
+exactly five percent. It avoids the former binary-float total
+`300.00000000000006`, which incorrectly treated the 15 g pork in Sanhe Rice
+Dumplings as a minor ingredient. Other numerical optimization remains
+floating-point; this correction is limited to source threshold classification.
+
+The independently verified reconstruction has 320 source rows, 308 parseable
+recipes, 61 eligible recipes across eight cuisines, and 222 all-within-cuisine
+pairs. Sanhe Rice Dumplings fails when its exactly-five-percent pork receives
+its published factor. Sweet Barbecue Pork remains excluded because its 15 g
+sugar is below five percent of its actual 300.2 g parsed total. A fixed 15 g
+cutoff is not used.
+
+Stage-18 M2 is reconstructed downstream without changing cohort eligibility:
+directly mapped positive factors use shared ±25% intervals, while unmapped
+minor ingredient keys use the frozen positive-factor interval
+`[1.145000, 4.763000]`. Identical normalized ingredient keys share one factor
+interval across recipes.
