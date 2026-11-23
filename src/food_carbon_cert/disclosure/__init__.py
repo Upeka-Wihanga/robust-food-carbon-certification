@@ -1,2 +1,1 @@
 """Ingredient-share disclosure models."""
-

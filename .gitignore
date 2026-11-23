@@ -17,6 +17,9 @@ dist/
 venv/
 env/
 
+# Local research scratch workspace
+workbench/
+
 # Generated experiment output
 results/current/**
 !results/current/.gitkeep
