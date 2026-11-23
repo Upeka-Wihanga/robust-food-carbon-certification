@@ -1,0 +1,3 @@
+Food_Code,Mod_Code,Ingredient_Num,FCID_Code,Cooked_Status,Food_Form,Cooking_Method,Commodity_Weight,CSFII_9498_IND,WWEIA_9904_IND,WWEIA_0510_IND
+001,A,01,100,Raw,"  source spacing  ",None,12.50,1,0,1
+001,A,02,101,Cooked,Whole,Boiled,,1,0,1
