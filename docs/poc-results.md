@@ -46,9 +46,15 @@ research record; it does not imply that executable source is present here.
 - Source code available: **NO**.
 - Frozen numerical evidence available: **PARTIAL**; rules and boundary cases are
   frozen, but the original full fixture set and rerun outputs are missing.
-- Migration status: not started.
-- Validation required: exhaustive threshold/lattice tests and sampled
-  publication-property checks for every returned component.
+- Migration status: `RECONSTRUCTED_BASELINE_VALIDATED`.
+- Reconstructed validation:
+  - 4.5%/5.0% boundary repair: **PASS**.
+  - 5.5% unattainable case: **PASS**.
+  - Deterministic grid verification: **2,001 samples, 0 inverse-membership
+    failures, 0 impossible components**.
+- Historical original implementation: **STILL UNAVAILABLE**. These results
+  validate the reconstructed baseline and do not claim recovery of that
+  implementation.
 
 ## PoC 4 — External Guan validation
 
