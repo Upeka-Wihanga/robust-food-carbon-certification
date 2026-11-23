@@ -58,11 +58,12 @@ class WorksheetSource:
 
 @dataclass(frozen=True, slots=True)
 class WorkbookSource:
-    """A raw workbook loaded without cleaning, filtering, or formula evaluation."""
+    """A raw workbook loaded without cleaning, filtering, or recalculation."""
 
     path: Path
     sheets: tuple[WorksheetSource, ...]
     verification: FileVerification | None
+    data_only: bool
 
     @property
     def sheet_names(self) -> tuple[str, ...]:
@@ -135,10 +136,11 @@ def load_workbook_source(
     path: str | Path,
     *,
     expected: SourceManifestEntry | None = None,
+    data_only: bool = False,
     required_sheets: Sequence[str] = (),
     required_headers: dict[str, HeaderRequirement] | None = None,
 ) -> WorkbookSource:
-    """Load every worksheet while preserving raw cell values and formulas."""
+    """Load every sheet as formulas or stored values without recalculation."""
 
     source_path = Path(path)
     if not source_path.is_file():
@@ -150,7 +152,7 @@ def load_workbook_source(
         workbook = load_workbook(
             source_path,
             read_only=True,
-            data_only=False,
+            data_only=data_only,
             keep_links=True,
         )
     except (BadZipFile, InvalidFileException, OSError) as error:
@@ -169,7 +171,7 @@ def load_workbook_source(
     finally:
         workbook.close()
 
-    source = WorkbookSource(source_path, sheets, verification)
+    source = WorkbookSource(source_path, sheets, verification, data_only)
     _validate_schema(
         source,
         required_sheets,

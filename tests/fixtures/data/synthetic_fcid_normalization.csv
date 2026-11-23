@@ -1,0 +1,7 @@
+Food_Code,Mod_Code,Ingredient_Num,FCID_Code,Cooked_Status,Food_Form,Cooking_Method,Commodity_Weight,CSFII_9498_IND,WWEIA_9904_IND,WWEIA_0510_IND
+001,A,1,100,Raw,Whole,None,30,1,0,1
+001,A,2,,Raw,Whole,None,70,1,0,1
+002,B,1,101,Cooked,Whole,Boiled,2,0,1,1
+002,B,2,999,Cooked,Whole,Boiled,3,0,1,1
+003,C,1,300,Raw,Whole,None,,1,1,1
+004,D,2,400,Raw,Whole,None,10,1,1,1

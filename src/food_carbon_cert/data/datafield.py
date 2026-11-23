@@ -51,12 +51,14 @@ def load_datafield(
     path: str | Path,
     *,
     expected: SourceManifestEntry | None = None,
+    data_only: bool = False,
 ) -> WorkbookSource:
-    """Load dataFIELD without evaluating formulas, mapping, or filtering rows."""
+    """Load formulas or their stored values without mapping or filtering rows."""
 
     return load_workbook_source(
         path,
         expected=expected,
+        data_only=data_only,
         required_sheets=DATAFIELD_REQUIRED_SHEETS,
         required_headers=DATAFIELD_REQUIRED_HEADERS,
     )
