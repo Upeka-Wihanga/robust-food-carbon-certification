@@ -1,0 +1,2 @@
+"""Ordered-composition geometry."""
+

@@ -1,0 +1,40 @@
+# Python caches and build output
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Generated experiment output
+results/current/**
+!results/current/.gitkeep
+
+# Raw data must be obtained and verified separately
+data/raw/**
+!data/raw/.gitkeep
+
+# Import bundle and its duplicated raw sources are migration inputs
+handoff/
+Codex_Research_Handoff_v1.zip
+
+# Notebooks and operating-system/IDE files
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
+
