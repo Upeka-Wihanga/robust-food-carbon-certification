@@ -38,3 +38,24 @@ must preserve these non-negotiable rules:
 The current engineering default tolerance is `1e-12`. It is newly defined for
 this baseline and is not claimed to be a recovered historical tolerance.
 
+## Stage-26 policy layer
+
+The Stage-26 policy implementation is a pre-performance reconstruction under
+the repository's frozen protocol. It contains B0–B4, the two-step OASA rollout,
+and an evaluation-only hindsight ceiling. It does not contain or report the
+final held-out policy comparison.
+
+Implementable policy APIs receive only the current uncertainty state and
+starting-regime label. Actual latent shares and factor-world values are held by
+a separate observation provider and enter state only after a policy returns a
+canonical acquisition action.
+
+Every prospective action score uses exactly nine equal-probability midpoint
+quantiles of the action's current interval. Share nodes are checked against the
+current ordered-composition geometry. Policies stop immediately after robust
+certification and retain actual cost spent.
+
+The fixed staged baseline is defined through the frozen primary budget `B=2`.
+No additional third-step action-type ordering is inferred for the secondary
+`B=3` analysis.
+
