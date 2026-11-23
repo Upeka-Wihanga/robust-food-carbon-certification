@@ -23,6 +23,7 @@ from .guan import load_guan
 from .mapping import (
     CommodityMappingRecord,
     MappingAudit,
+    MappingPolicy,
     MappingStatus,
     audit_fcid_datafield_mapping,
 )
@@ -58,6 +59,7 @@ __all__ = [
     "HeaderRequirement",
     "LinkageStatus",
     "MappingAudit",
+    "MappingPolicy",
     "MappingStatus",
     "NormalizedDatafieldFactors",
     "NormalizedFcid",

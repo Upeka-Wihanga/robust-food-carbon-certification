@@ -153,12 +153,12 @@ formula/value. The historical downstream treatment remains undocumented.
 
 ### Strong inference
 
-- A semantic `babyfood -> terminal-0 parent commodity` crosswalk is defensible
-  for the 118 confirmed pairs as a newly documented reconstructed mapping
-  policy. The official metadata proves the parent relationship, and every
-  parent has one dataFIELD factor. This does not prove that the unavailable
-  historical pipeline applied that factor, and the five weight-basis wording
-  differences must remain visible.
+- A semantic `babyfood -> terminal-0 parent commodity` crosswalk is implemented
+  for the 118 confirmed pairs as an optional reconstructed mapping policy. The
+  official metadata proves the parent relationship, and every parent has one
+  dataFIELD factor. This does not prove that the unavailable historical
+  pipeline applied that factor, and the five weight-basis wording differences
+  remain explicit warnings.
 - `center = G` is **STRONGLY_INFERRED** because `G` is the workbook's utilized
   factor and the historical scenario perturbed dataFIELD factors, but no
   surviving interval-construction equation states the center.
@@ -325,8 +325,13 @@ The terminal `1 -> 0` relationship is now authoritative for 118 baby-food
 variant/base-commodity pairs. It is defensible as a new, explicitly documented
 reconstructed mapping policy, subject to preserving the five weight-basis text
 differences. It is not recovered evidence of the unavailable historical
-factor-mapping implementation. Production mapping remains exact-code-only
-pending a separate implementation decision.
+factor-mapping implementation. The implementation exposes it only through the
+explicit `EXACT_PLUS_CONFIRMED_BABYFOOD_PARENT` policy; `EXACT_ONLY` remains
+available and is the default.
+
+**The baby-food parent policy is an evidence-backed reconstructed policy
+introduced by this implementation. It is not claimed to reproduce unavailable
+historical mapping code.**
 
 ## SD1/SD2 uncertainty audit
 

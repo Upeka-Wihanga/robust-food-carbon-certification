@@ -6,7 +6,7 @@ outputs.
 
 ## Architecture
 
-`verified raw source -> normalized table -> exact-code mapping audit`
+`verified raw source -> normalized table -> explicit mapping-policy audit`
 
 Research selection, pair/action construction, and experiment-specific
 uncertainty scenarios are deliberately downstream and are not implemented
@@ -81,21 +81,36 @@ No uncertainty interval is derived here. The surviving frozen evidence names
 not recover a sufficiently complete source-to-interval construction rule to
 recreate those historical scenarios without inference.
 
-## Exact-code mapping audit
+## Mapping-policy audit
 
-Mapping compares canonical FCID code strings only. It does not pad, truncate,
-or replace code digits, and duplicate candidate rows remain ambiguous.
+The mapping API requires one of two explicit policies:
 
-Current verified-source audit:
+- `EXACT_ONLY` compares canonical FCID code strings only;
+- `EXACT_PLUS_CONFIRMED_BABYFOOD_PARENT` gives exact matches precedence and
+  then consults a literal 118-pair crosswalk verified against the official
+  WWEIA-FCID 2005-2010 descriptions and commodity vocabulary.
 
-- 484 unique nonmissing FCID ingredient codes;
-- 354 directly mapped;
-- 130 unmapped;
-- zero codes with multiple candidates;
-- zero ambiguous mappings;
-- zero mapped codes with missing/non-finite factor values;
-- 40 FCID ingredient rows with no source commodity code.
+The enhanced policy does not rewrite arbitrary terminal digits. The two
+parentless exceptions (`3600225001` and `3700222501`), unknown terminal-`1`
+codes, and the 10 terminal-`0` gaps remain unmapped. The original FCID code is
+retained separately from the mapped parent code. Mapping records identify the
+selected policy, provenance status, reason, and weight-basis warning.
 
-Of the 130 exact-code unmapped identifiers, 120 end in `1`; many have a
-dataFIELD identifier differing only in the final digit. No such relationship
-is applied because the historical code-normalization rule is unavailable.
+**The baby-food parent policy is an evidence-backed reconstructed policy
+introduced by this implementation. It is not claimed to reproduce unavailable
+historical mapping code.**
+
+Verified-corpus coverage is:
+
+- `EXACT_ONLY`: 354 mapped and 130 unmapped unique codes; 127,360 mapped and
+  2,503 unresolved ingredient rows; 11,608 recipes with complete factor
+  coverage and 461 incomplete recipes.
+- `EXACT_PLUS_CONFIRMED_BABYFOOD_PARENT`: 472 mapped and 12 unmapped unique
+  codes; 129,711 mapped and 152 unresolved ingredient rows; 11,921 recipes
+  with complete factor coverage and 148 incomplete recipes.
+- Improvement: 118 codes, 2,351 ingredient rows, and 313 completely covered
+  recipes.
+
+Unresolved ingredient-row counts include the 40 rows whose source FCID code is
+missing. Five mapped baby-food/base-parent pairs carry a weight-basis warning;
+no conversion is applied.
