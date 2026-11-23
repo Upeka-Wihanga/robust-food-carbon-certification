@@ -1,0 +1,32 @@
+{
+  "manifest_version": 1,
+  "files": [
+    {
+      "expected_filename": "Carbon footprint and nutrition estimation of Chinese cuisines.xlsx",
+      "source_category": "guan_external_recipe_workbook",
+      "sha256": "22b55adad2b463fcff60f486560c66468923323609371ddaa5b3d42ddd34b80b",
+      "bytes": 157817,
+      "local_expected_path": "data/raw/Carbon footprint and nutrition estimation of Chinese cuisines.xlsx",
+      "commit_to_git": false,
+      "redistribution_status": "UNKNOWN_REQUIRES_LICENSE_CHECK"
+    },
+    {
+      "expected_filename": "Recipes_WWEIA_FCID_0510.csv",
+      "source_category": "fcid_wweia_recipe_commodity_source",
+      "sha256": "3689803e5ef099fd4831d1136dabba183bff5454fc998fa7d7b7da61cf766c56",
+      "bytes": 5863715,
+      "local_expected_path": "data/raw/Recipes_WWEIA_FCID_0510.csv",
+      "commit_to_git": false,
+      "redistribution_status": "UNKNOWN_REQUIRES_LICENSE_CHECK"
+    },
+    {
+      "expected_filename": "dataFIELDv1.0.xlsx",
+      "source_category": "datafield_impact_factor_source",
+      "sha256": "a2e0c8a609c88e96d679799666c37e678b75f60050cdc2eeb3e8b2498e9d4759",
+      "bytes": 1357202,
+      "local_expected_path": "data/raw/dataFIELDv1.0.xlsx",
+      "commit_to_git": false,
+      "redistribution_status": "UNKNOWN_REQUIRES_LICENSE_CHECK"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "path": "00_READ_ME_FIRST.md",
+    "sha256": "9ec30c0589d08774824e04190d78aa5e781cb3bd1cf498f2fc2f29889b13a66c",
+    "bytes": 1575,
+    "category": "handoff_metadata"
+  },
+  {
+    "path": "MISSING_ORIGINAL_ARTIFACTS.md",
+    "sha256": "08e540d0d46677d513ae00acf107b1d2af2e8f5bc0f56eb8382984b7b0bb86b3",
+    "bytes": 1609,
+    "category": "handoff_metadata"
+  },
+  {
+    "path": "POC_MAPPING_GUIDE.md",
+    "sha256": "517b58148338e90bc1e65085477cbeebad748668d07e569fd269c9692b05ea43",
+    "bytes": 1548,
+    "category": "handoff_metadata"
+  },
+  {
+    "path": "frozen_research/Pasted text.txt",
+    "sha256": "bcf4251c361d18dcdfbe84a9dfa782f21e7963f19b424ceb3f92765367574f9c",
+    "bytes": 32971,
+    "category": "frozen_research"
+  },
+  {
+    "path": "frozen_research/Progress_Tracker_After_Stage24.md",
+    "sha256": "fee43d4942dc2b942a693fa6d064ad6c4df7f1ca00c914a8fce52409703b2046",
+    "bytes": 1427,
+    "category": "frozen_research"
+  },
+  {
+    "path": "frozen_research/Stage18_1_2_Frozen_Protocol.md",
+    "sha256": "a05e943383467bc63cb0a6d056dfc344acddf847432e09672f075bc44c9c1d5d",
+    "bytes": 5030,
+    "category": "frozen_research"
+  },
+  {
+    "path": "frozen_research/Stage24_Targeted_Information_Acquisition_Report.md",
+    "sha256": "e5b87fdfae4ba60d5f69a20f4f700d539e3eeb4e9fc8e743e33d9c234d5feb85",
+    "bytes": 6644,
+    "category": "frozen_research"
+  },
+  {
+    "path": "raw_data/Carbon footprint and nutrition estimation of Chinese cuisines.xlsx",
+    "sha256": "22b55adad2b463fcff60f486560c66468923323609371ddaa5b3d42ddd34b80b",
+    "bytes": 157817,
+    "category": "raw_data"
+  },
+  {
+    "path": "raw_data/Recipes_WWEIA_FCID_0510.csv",
+    "sha256": "3689803e5ef099fd4831d1136dabba183bff5454fc998fa7d7b7da61cf766c56",
+    "bytes": 5863715,
+    "category": "raw_data"
+  },
+  {
+    "path": "raw_data/dataFIELDv1.0.xlsx",
+    "sha256": "a2e0c8a609c88e96d679799666c37e678b75f60050cdc2eeb3e8b2498e9d4759",
+    "bytes": 1357202,
+    "category": "raw_data"
+  },
+  {
+    "path": "research_reviews/High Model(2).md",
+    "sha256": "5583f74729b1eeb66a9757f546c5b2c3b863f7d8028f32878bb7ad6737bd75ab",
+    "bytes": 31903,
+    "category": "review"
+  },
+  {
+    "path": "research_reviews/High Model.md",
+    "sha256": "e0b7e621c050f89adddaf7208a19765eb4226a5619c0af83c69bfb393da3f718",
+    "bytes": 29386,
+    "category": "review"
+  },
+  {
+    "path": "research_reviews/Stage14_Independent_Blind_Review.md",
+    "sha256": "04587826ad8ce7bee47b7fac48e8b63973671c6c4134f5e6e6be987f61c260c3",
+    "bytes": 28433,
+    "category": "review"
+  },
+  {
+    "path": "research_reviews/Stage17_Independent_Blind_Review.md",
+    "sha256": "587fdd99145c13145e21d6d2ad30de0ef8fe36a0899acce93031105477137698",
+    "bytes": 32735,
+    "category": "review"
+  }
+]

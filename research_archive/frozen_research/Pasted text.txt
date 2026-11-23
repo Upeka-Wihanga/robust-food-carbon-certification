@@ -1,0 +1,358 @@
+Stage 19 — Independent Research Review
+Review subject: Robust Food-Carbon Certification Under Coarse Ingredient Disclosure
+Verdict: REVISE
+Not yet journal-ready
+
+The corrected research contribution is credible enough to develop as a Final Year Project, but the available evidence does not yet establish a sufficiently distinctive or generalizable contribution for a strong IEEE Access / Q1-style journal submission.
+
+This is an independent assessment of the current Stage 19 contribution, not a restoration or adjustment of any earlier score.
+1. Independent scores
+Assessment criterion	Score
+Novelty	6.5 / 10
+Mathematical soundness	8.5 / 10
+Methodological soundness	6.5 / 10
+FYP suitability	8.5 / 10
+IEEE Access / Q1-style publication potential	5.5 / 10
+Reproducibility	7.5 / 10
+
+These are reviewer judgments, not statistical probabilities of journal acceptance.
+Why the scores are not higher
+Novelty (6.5): The precise combination of worst-case pairwise guarantees, coarse ingredient disclosure, shared uncertain factors and pre-disclosure policies is distinctive. However, ingredient-list environmental estimation, partial-composition reconstruction, uncertainty sensitivity, robust comparative LCA and information-discovery policies are already established research areas. The remaining novelty is mainly application-specific empirical characterization, not a new optimization method.
+
+Methodological soundness (6.5): The mathematical correction, nonzero-minor sensitivities, selectable policies and dependence-aware bootstrap represent substantive improvements. Nevertheless, the analysis still lacks a controlled decomposition of share uncertainty versus factor uncertainty, a representative commercial-label applicability study and sufficiently broad source-faithful external validation.
+
+Publication potential (5.5): The present findings could support a publishable research direction, but a journal paper would need to demonstrate why the identified information bottleneck is scientifically nontrivial, when it occurs, and how accurately it predicts the value of additional disclosures or improved factor information.
+2. Hard findings
+Question	Independent finding
+Direct prior equivalent found?	NO, within the literature examined
+Valid counterexample to corrected core found?	NO, within the stated mathematical model
+Original four-corner shortcut valid?	NO — correctly withdrawn
+Corrected oracle independently checked?	YES — additional LP comparisons performed
+Reported containment/direction consistency?	YES — checked in supplied action-level results
+Fully independent end-to-end reproduction completed here?	NO — limited independent execution and source auditing
+
+Evidence independently checked
+I inspected the supplied reports, frozen protocols, core solver, regression tests, source-data structure, policy code, dependence bootstrap, factor-variability code and reproduction artifacts.
+- The permanent old-shortcut counterexample was reproduced. The invalid shortcut gave an upper bound of −0.002125, whereas the corrected full-interval oracle gave +0.002000 and correctly abstained.
+- I generated an additional 50 randomized small problems and compared the interval-vertex oracle with generic LP/factor-corner optimization. All 50 agreed, with a maximum absolute bound difference of approximately \(2.22\times10^{-15}\).
+- I independently checked the stored Guan61 M2, Guan86 M2, FCID SD1 and FCID SD2 action results. No containment or direction violations were found, and SD1-to-SD2 nesting was consistent.
+- The outer archive's 17 manifest-listed files passed SHA-256 verification. Another 23 source, script and reference files in the portable bundle also passed their recorded hash checks.
+These findings support the mathematical implementation, but numerical agreement cannot prove correctness for every possible input. The proof and remaining limitations are discussed below.
+3. Independent prior-work assessment
+The literature search identifies substantial prior work that limits the originality claim.
+Closest research	Existing contribution	Implication for Stage 19
+Clark et al., 2022 — Estimating the environmental impacts of 57,000 food products	Uses ordered ingredient declarations and partially available percentages to reconstruct compositions, estimate impacts, and assess uncertainty.	Establishes much of the food-label motivation and composition-uncertainty problem. 
+PubMed Central (PMC)
+Coste & Hélias, 2022 — PEFAP	Uses packaging data, feasible recipe proportions, Monte Carlo estimation and optimization-based bound tightening.	Strong overlap in the ingredient-constraint and environmental-impact modeling framework. 
+theoj.org
+Heijungs, 2020 — Selecting the best product alternative in a sea of uncertainty	Studies the reliability of comparative LCA decisions when impacts are uncertain.	Uncertainty-aware product comparison is already established. 
+Springer Nature Link
+Groen et al., 2017 — Methods for global sensitivity analysis in life cycle assessment	Quantifies how uncertain LCA inputs affect results and supports prioritization of data collection.	Weakens claims that identifying the dominant uncertainty source is itself a new methodological idea. 
+Springer Nature Link
+Decision-dependent information-discovery literature	Studies selecting uncertain quantities to reveal before making robust decisions.	Limits theoretical novelty of choosing which ingredient percentage to disclose. 
+PubsOnline+1
+Mohamed & Alosman, 2026 — Calibrated screening-level life cycle assessment of food products from ingredient data	Models food-product impacts from ingredient declarations, propagates ingredient-share uncertainty, and provides calibrated screening intervals.	A particularly recent and important comparator, although it does not establish the same worst-case pairwise certificate. 
+ScienceDirect
+
+Novelty conclusion
+No directly equivalent system combining the exact Stage 19 uncertainty model, one-rank disclosure policies and the same certification-sufficiency evaluation was identified.
+
+However, being the first to combine existing techniques is not sufficient scientific novelty on its own.
+
+The potentially original element is the measurable relationship between information precision, factor uncertainty, and retained certification decisions. Its significance will depend on demonstrating that this relationship produces useful new knowledge beyond predictable consequences of expanding uncertainty sets.
+4. Strongest rejection argument
+The project's central finding is not yet separated sufficiently from a mathematical and statistical selection effect.
+
+Larger uncertain-factor boxes generally make robust comparisons harder to certify. At the same time, measuring rounded-disclosure retention only among comparisons that remain certifiable selects a subset of relatively robust decisions. Consequently, high conditional retention and falling absolute coverage can occur without revealing a new domain-specific principle.
+
+The current results are consistent with the claimed factor-versus-share bottleneck, but they do not yet quantify the independent contribution of each uncertainty source under a matched experimental design.
+
+This concern is amplified by source selection, a small FCID panel, the source-total reconstruction problems in Guan86, and the absence of observed commercial-label disclosure availability.
+5. Strongest acceptance argument
+The project has a defensible applied-research question and a working, carefully constrained answer.
+
+It does not merely estimate which food has lower emissions. It asks whether one conclusion is guaranteed across all modeled feasible ingredient compositions and shared impact factors, and whether a deliberately limited disclosure can preserve that guarantee.
+
+This is valuable because it distinguishes three outcomes that ordinary point-estimation approaches may conflate:
+- A comparison is robustly certified using the available information.
+- A comparison becomes certifiable after acquiring additional information.
+- Available information remains insufficient, requiring abstention.
+The corrected geometry, shared-factor treatment, multiple sensitivity cohorts and executable policy comparisons make the investigation technically meaningful for an FYP.
+6. Required changes before beginning the FYP implementation
+These changes do not require abandoning the project or inventing a completely new optimization algorithm.
+1. Lock the research contribution as an information-sufficiency and uncertainty-bottleneck study. Remove generic algorithmic-novelty claims permanently.
+2. Specify a controlled factor-versus-share experiment. For the same frozen recipe pairs, compare exact versus rounded shares crossed with fixed versus uncertain impact factors. Measure coverage losses and interaction effects.
+3. Define two distinct disclosure settings: a hypothetical voluntary ingredient-percentage query, and a commercially available QUID declaration. Do not equate them.
+4. Fix the unit and boundary of comparison. State the use of normalized ingredient mass and upstream ingredient-production emissions, and exclude unsupported finished-product or whole-lifecycle claims.
+5. Finalize the evaluation plan before new experiments: datasets, eligible recipe rules, policy selection procedure, baseline comparisons, sensitivity scenarios and dependence-aware uncertainty methods.
+6. Add a commercial-label constraint audit. Actual European labeling permits special treatment of small ingredients and, in some cases, QUID values calculated relative to finished-product mass after moisture loss. These distinctions are not captured by a universal ordered, unit-sum recipe model. 
+   Legislation.gov.uk+2
+FYP implementation decision: Proceed after these design revisions. The current mathematical framework is sufficiently mature to serve as a research implementation foundation.
+7. Required changes before journal submission
+For a strong journal submission, I would additionally require:
+1. A matched factorial uncertainty experiment and an explicit bottleneck attribution analysis, with dependence-aware uncertainty estimates.
+2. A substantially larger independent dataset with reliable ingredient mappings and validated production-impact references.
+3. A commercial-label study measuring how often the policies' chosen ranks are actually disclosed, and how much certification coverage remains when choices are restricted to available disclosures.
+4. A direct quantitative comparison against existing ingredient-list environmental assessment methods, not just simple rank-selection baselines.
+5. An evaluation of out-of-domain generalization, including different recipe categories, factor distributions, uncertainty correlations and ingredient-mapping errors.
+6. A formal proof of the corrected interval optimization construction, plus certified numerical-bound handling for near-zero decisions.
+7. An unrestricted clean-machine reproduction with automatic input-hash verification and independently regenerated bootstrap replicates.
+One specific reproduction defect remains: reproduce.py contains metric comparisons but does not actually execute the source-hash validation promised by its protocol. I manually validated the supplied hashes, but the automation should be repaired before submission.
+8. Answers to Questions 1–49
+A. Mathematical correctness
+1. Is the corrected whole-interval robust certificate mathematically sound?
+
+YES, under the stated assumptions. The formulation correctly requires a pairwise emissions difference to retain its sign across every feasible composition and every shared uncertain-factor realization. This provides a deterministic worst-case guarantee relative to the assumed uncertainty sets, not an unconditional guarantee about real-world emissions.
+
+2. Is the slab-intersection vertex construction complete?
+
+YES. The ordered simplex has prefix-uniform vertices. Intersecting it with a single coordinate interval creates vertices from retained simplex vertices and intersections of simplex edges with the two interval boundaries. These are sufficient to optimize the relevant objectives. The implementation's numerical tests support this construction.
+
+3. Is the exact QUID publication inverse now correctly specified at threshold/tie cases?
+
+YES, for the project's explicit two-grid, half-up rounding convention. The repaired inverse correctly eliminates the impossible high-branch component at 4.5%, handles the 5% transition and rejects unattainable branch outputs. Legal or commercial reporting conventions must still be checked independently.
+
+4. Can you construct a counterexample to the corrected current core?
+
+NO valid counterexample was found. The original counterexample now correctly produces abstention. Additional randomized comparisons against generic LP and factor-corner optimization agreed numerically. This is strong evidence, though not an exhaustive formal verification of every implementation path.
+
+5. Are strict sign/tolerance rules adequately conservative?
+
+For an FYP prototype, YES; for a formally certified production implementation, not completely. Requiring \(U < -10^{-10}\) or \(L > 10^{-10}\) avoids marginal floating-point decisions. However, a journal-level numerical guarantee should use verified outward error bounds or an equivalent certified procedure.
+
+6. Does shared-factor treatment remain correct?
+
+YES. The implementation uses a common uncertain commodity factor when the same mapped commodity occurs in both foods. Its signed coefficient is calculated from the difference in commodity shares, rather than treating the two contributions as independent uncertain factors. This is the appropriate interpretation of the stated shared-factor model.
+
+7. Does any Stage-18 sensitivity violate containment expectations?
+
+NO in the examined outputs. Guan61 M2, Guan86 M2 and both FCID dataFIELD scenarios showed zero observed containment/direction violations. I also verified that the wider SD2 factor scenario does not produce narrower robust intervals than SD1.
+B. Methodological soundness
+8. Is Guan61 nonzero-minor sensitivity adequate to answer the structural-zero criticism?
+
+YES as a sensitivity test, but not as complete validation. M1–M3 show that high conditional disclosure retention does not require structural-zero minor ingredients. However, fallback impacts remain modeled rather than independently measured, so the true factors of unmapped ingredients are unresolved.
+
+9. Is M2 a defensible sensitivity model, given it is not ground truth?
+
+YES. Using the source-factor distribution's 25th-to-75th percentile interval is a defensible, transparently specified uncertainty scenario. It must not be presented as a statistically calibrated bound for an individual unmapped ingredient.
+
+10. Does Guan86 broaden external validity meaningfully despite poor source-total reproduction?
+
+Only partially. It demonstrates that the model's qualitative behavior survives expansion from 61 to 86 mapping-complete recipes. But the added recipes' median source-production-total reconstruction error of 48.3% prevents treating that expansion as strong ground-truth replication.
+
+11. Is it appropriate to keep Guan61 primary and Guan86 secondary?
+
+YES. Guan61 has substantially better agreement with the original source-production totals under the original reconstruction convention. One qualification is essential: applying M2 changes the treatment of minor ingredients, so the M2 outputs themselves should be called results on a source-reconstruction-selected cohort, not verified source-faithful totals.
+
+12. Is the recipe-node pigeonhole bootstrap defensible for dyadic recipe dependence?
+
+YES, as a reasonable first method. Resampling recipe nodes within strata and weighting a pair by its endpoint multiplicities acknowledges that multiple comparisons reuse recipes. It is preferable to treating hundreds of overlapping comparisons as independent observations.
+
+13. Are dependence-aware intervals interpreted correctly?
+
+Mostly YES. The intervals are correctly wider than naive pairwise intervals and are accompanied by paired policy-versus-hindsight differences. They should, however, be interpreted conditionally on the selected datasets, cuisine strata and observed comparison graph—not as guaranteed population-level confidence intervals.
+
+14. Should cuisine-level uncertainty be treated differently with only eight cuisines?
+
+YES. Eight cuisines offer weak support for broad random-effects or population-wide inference. Cuisine-level leave-one-out stability analysis is useful; stronger publication claims should use more independent cuisine or dataset clusters and distinguish within-cuisine from between-cuisine uncertainty.
+
+15. Is the selectable-policy design free from hidden-share leakage?
+
+No explicit leakage was identified in the inspected P1–P4 selection code. These policies choose ranks from ingredient identities, factors, rank and geometric widths. The historical FCID P5 policy requires stronger provenance and a clean evaluation split before it can be treated as an unbiased predictive baseline.
+
+16. Are rank-weighted and feasible-width policies meaningful baselines?
+
+YES. They are simple, interpretable, inexpensive policies that use information permitted before disclosure. Their success is relevant, although comparisons with randomized, optimized and cost-aware selection rules would strengthen the analysis.
+
+17. Does policy coverage near the hindsight ceiling establish practical actionability?
+
+It establishes conditional actionability within the modeled disclosure experiment. Guan61's 81/222 and Guan86's 204/487 selected certificates are meaningful relative to their hindsight ceilings of 88/222 and 223/487. It does not establish that manufacturers or retailers actually provide the selected percentages.
+
+18. Is FCID's weaker policy performance adequately acknowledged?
+
+YES. FCID's 21% selected coverage versus 28% hindsight is substantially weaker than Guan's approximately 92% recovery of its ceiling. The dataFIELD scenarios weaken absolute selected coverage further, and this should remain prominent in the conclusions.
+
+19. Are dataFIELD scaled SDs legitimately usable as factor-specific variability stress sets?
+
+YES, with the stated qualification. They provide heterogeneous, source-derived variability scales and are more informative than uniformly applying an arbitrary percentage. They are not automatically bounds on the true commodity factor or estimates of product-specific epistemic uncertainty.
+
+20. Are 1-SD / 2-SD boxes appropriately distinguished from confidence intervals?
+
+YES in the supplied reports. The distinction must also be enforced in the final paper, visualizations, abstract and any user interface. No probability-of-correct-certification statement follows from these boxes.
+
+21. Does the factor-specific experiment support the claim that factor uncertainty is a dominant bottleneck?
+
+It supports that interpretation within the tested FCID scenarios, but not as a general causal conclusion. Absolute QUID pair coverage decreases from 28% under historical ±25% boxes to 15% and 10% under the broader SD scenarios, while conditional disclosure retention remains high. A factorial analysis is needed to establish the relative impact of the two uncertainty sources more convincingly.
+
+22. What important confounding explanation remains?
+
+Survivorship and uncertainty-width confounding. Comparisons that remain certifiable under larger factor boxes may already have large environmental-impact margins. The same selection naturally produces high conditional disclosure retention, even without a special ingredient-disclosure phenomenon.
+
+23. Does commercial QUID availability need to be measured before locking the FYP method?
+
+Not if the FYP is explicitly a controlled information-discovery experiment. It must be measured before claiming real-world commercial-label coverage or deployment feasibility. The research should distinguish those goals from the outset.
+
+24. What methodological issue, if any, still blocks an FYP implementation?
+
+There is no demonstrated mathematical blocker to a bounded FYP implementation. The remaining issue is study design: the primary experiment needs to be specified so that its central novelty claim can actually be tested, rather than inferred from separate sensitivity results.
+C. Originality
+25. Is disclosure-sufficiency under ordered recipe uncertainty already directly established in prior literature?
+
+Partly, but not in exactly the same certification formulation. Earlier studies establish that ordered ingredient lists and limited disclosed quantities contain useful environmental-impact information. The exact preservation of worst-case pairwise certificates by one coarse disclosure is a narrower question that I did not find directly established.
+
+26. Does general robust sensitivity analysis make the nested precision result routine?
+
+The monotonic relationship is routine. Enlarging a feasible uncertainty set cannot improve the worst-case certificate for the same decision. The empirical question of how quickly coverage deteriorates, which disclosures matter, and whether these patterns generalize may still contribute useful evidence.
+
+27. Does decision-dependent information discovery subsume the actionable disclosure-policy contribution?
+
+It subsumes the general decision-theoretic concept. Selecting information to reveal before making a robust decision is established. Stage 19's distinction is its food-specific policy design, certification outcome and empirical evaluation, rather than a fundamentally new information-discovery framework.
+
+28. Does ingredient-based uncertainty-aware LCA already establish the same empirical finding?
+
+Not in precisely the same form, but there is significant overlap. Prior ingredient-based LCA work evaluates missing composition, sourcing uncertainty and product ranking; the 2026 screening study also quantifies ingredient-share uncertainty. The project's stronger distinction is deterministic pairwise certification, rather than probabilistic or screening-level impact estimation. 
+PubMed Central (PMC)+1
+
+
+29. Is the factor-vs-share uncertainty bottleneck characterization a genuinely new empirical insight?
+
+Potentially, but currently only moderately novel. Its specificity to robust pairwise certification is interesting. Its broader interpretation resembles established LCA sensitivity reasoning, and the present evidence does not yet separate a novel domain-specific relationship from a predictable robust-optimization effect.
+
+30. Is cross-dataset replication plus actionability enough to make that insight substantive?
+
+Not yet. The high conditional share-retention pattern appears in more than one recipe dataset, but the factor-specific SD analysis is performed on FCID. Therefore the central factor-versus-share bottleneck is not independently replicated across both datasets under comparable uncertainty models.
+
+31. Is the corrected exact interval formulation itself worth any methods contribution?
+
+YES, as a reproducible applied formulation and correctness result. The precise derivation, handling of rounded disclosures and shared factors, and validation against incorrect shortcuts are valuable technical material. However, general polyhedral optimization already supplies most of the underlying mathematics, limiting standalone algorithmic novelty.
+
+32. Is the complete combination distinctive but scientifically trivial?
+
+Distinctive, but not necessarily trivial. A rigorous study of minimum information needed for a dependable environmental decision can be meaningful. It becomes scientifically weak if it stops at reporting expected coverage monotonicity without explaining predictors, mechanisms, interventions or practical decision consequences.
+
+33. Identify the closest direct or near-direct prior work.
+
+The closest application-level works are Clark et al. (2022) and Coste & Hélias (2022), because both start from partially disclosed, ordered food ingredients and reconstruct environmentally meaningful composition information. Heijungs (2020) is an important conceptual comparator for uncertainty-aware comparative LCA, while the 2026 ingredient-data screening paper is a particularly relevant recent competitor. 
+PubMed Central (PMC)+3
+
+
+34. Direct prior equivalent found?
+
+NO. No exact equivalent was identified in this literature search. This means no direct equivalent was found among the sources examined, not that the absence of one has been proven exhaustively.
+
+35. What exact novelty sentence would you permit?
+We provide a correctness-validated empirical assessment of how coarse, single-ingredient-share disclosures preserve worst-case pairwise production-carbon certificates under shared uncertain impact factors, and quantify the resulting certification coverage and pre-disclosure policy performance across constrained recipe datasets.
+
+A separate findings sentence could identify reduced absolute coverage under factor-specific variability stress sets.
+
+36. What novelty sentence would you reject?
+We introduce the first mathematically novel robust food-carbon certification algorithm and prove that impact-factor uncertainty universally dominates missing ingredient-share information for commercial food products.
+
+That sentence is not supported by either the theoretical novelty or the external-validity evidence.
+D. Scientific significance
+37. Is 36–42% selectable Guan pair coverage practically meaningful for a bounded feasibility study?
+
+YES. Guaranteeing a comparison for approximately one-third to two-fifths of eligible within-cuisine pairs using one selected disclosure per recipe is a nontrivial result. Its significance applies to the selected cohorts and specified factor model, not all foods.
+
+38. Is 10–15% FCID coverage under dataFIELD variability too low to support significance?
+
+Not automatically, but it weakens deployment significance. Under the factor-specific scenarios, the highest selected-policy coverages are only 9% for SD1 and 7% for SD2. Such results may still be scientifically valuable if used to explain why certifications fail and where additional information would be effective.
+
+39. Does high conditional retention remain useful when absolute coverage is low?
+
+YES, provided both are reported together. High retention means coarse disclosure is often not responsible for losing a certificate among comparisons that are otherwise certifiable. But it does not mean the overall certification system has high coverage.
+
+40. Is abstention a useful guarantee feature or mainly a coverage limitation?
+
+Both. Abstention is essential for a sound worst-case decision rule and protects against unjustified environmental comparisons. At the same time, excessive abstention limits operational usefulness. A good paper should evaluate the guarantee-versus-coverage tradeoff explicitly.
+
+41. Does identifying factor uncertainty as the bottleneck create actionable research/design value?
+
+Potentially YES. It can guide whether effort should go toward improving commodity impact-factor evidence, requesting better ingredient disclosures or accepting uncertainty and abstaining. That value becomes credible when the study measures how much additional certification each intervention actually produces.
+
+42. Would improving impact-factor knowledge plausibly be more valuable than demanding exact recipes?
+
+YES for some scenarios represented here, but this is not yet a universal recommendation. The FCID results suggest that narrowing broad factor sets could recover more robust certificates than improving an already adequate rounded disclosure. A fair decision requires comparing equivalent information investments and costs.
+
+43. Does the absence of actual commercial-label availability data materially weaken this conclusion?
+
+YES for real-world actionability. Policies that choose any useful ingredient rank cannot automatically be treated as policies that exploit available retail labels. QUID applicability depends on labeling conditions, and ingredient-order exceptions further limit direct model transfer. 
+Food Safety Authority of Ireland+1
+
+
+44. What is the strongest credible use case now?
+
+A bounded audit or supplier-information triage tool. Given an ordered composition model and stated factor intervals, it can assess whether a production-carbon comparison is provable, whether one additional ingredient-share disclosure would help, and whether factor uncertainty is preventing a decision.
+
+This use case does not require claiming complete product-LCA accuracy or immediate compatibility with every commercial label.
+
+45. What is the strongest remaining rejection argument?
+
+The paper may demonstrate a well-executed instance of existing robust sensitivity analysis rather than a new, generalizable scientific finding. The strongest challenge is not whether the solver works, but whether its empirical results reveal a distinctive, reproducible principle with decision value beyond the selected datasets and chosen uncertainty boxes.
+E. Reproducibility
+46. Are the provided sources, scripts, hashes and reference outputs sufficient for audit?
+
+Largely YES. The archive contains substantial source data, executable analysis scripts, action-level results, frozen references and integrity hashes. I verified the supplied source and script checksums manually. The one-command reproduction script's missing automatic hash validation remains a concrete deficiency.
+
+47. Does the wrapper execution-ceiling limitation materially reduce trust?
+
+Only moderately. An execution-time limit is an orchestration issue rather than evidence of an incorrect mathematical method. Nevertheless, a journal reproduction package should be demonstrated on a clean, unrestricted environment, with an archived successful end-to-end log.
+
+48. Are component-level reruns plus metric comparison sufficient for FYP reproducibility?
+
+Generally YES for an FYP development milestone, assuming the inputs, software versions, seeds and outputs are preserved. For stronger independent reproducibility, the benchmark should also include a completely separate regenerated bootstrap and a reviewer-run comparison on a fresh environment.
+
+49. What must be added before journal submission?
+
+At minimum:
+- A complete clean-environment reproduction record, with execution commands and environment metadata.
+- Automatic SHA-256 verification before computation.
+- Independently regenerated bootstrap replicates, not only summaries recomputed from frozen replicate files.
+- Formal mathematical proofs and robust numerical regression tests.
+- Clear dataset licensing, inclusion rules, factor provenance and mapping-failure reporting.
+- Reproducible experiments demonstrating matched factor-versus-share sensitivity, external validation and realistic disclosure availability.
+- An explicit comparison against the closest existing ingredient-based environmental assessment methods.
+
+9. Recommended decisive next experiment
+The most important additional experiment is a matched uncertainty-source decomposition.
+
+Use the same frozen comparisons, but independently vary whether ingredient shares and impact factors are exact or uncertain.
+C00 — Reference
+
+Exact shares
+
+Fixed impact factors
+
+
+C10 — Share effect
+
+Rounded shares
+
+Fixed impact factors
+
+
+C01 — Factor effect
+
+Exact shares
+
+Uncertain impact factors
+
+
+C11 — Combined effect
+
+Rounded shares
+
+Uncertain impact factors
+
+
+
+Conceptual 2×2 experiment. Each cell uses identical recipe pairs and a clearly specified factor scenario.
+This design allows the study to estimate the certification loss attributable to share coarsening, factor uncertainty, and their interaction. It should be repeated across multiple uncertainty widths and datasets, with dependence-aware uncertainty analysis.
+
+The important question is no longer simply whether rounded disclosure often works. It is:
+
+Under what measurable conditions does improving impact-factor evidence provide greater certification benefit than improving ingredient-share disclosure?
+
+That is a stronger, more testable scientific question—and a better foundation for demonstrating a substantive contribution rather than only a collection of sensitivity results.
+10. Final 2–3 sentence summary
+The corrected Stage 19 work demonstrates a mathematically credible, reproducible foundation for conservative pairwise food-production carbon certification under incomplete ingredient disclosure, with meaningful evidence that simple disclosure policies preserve many attainable guarantees. However, its strongest claimed empirical contribution—the dominance of factor uncertainty over share precision—remains insufficiently isolated from standard robustness behavior and dataset-selection effects, while real commercial-label applicability remains unverified. Verdict: REVISE for journal-level acceptance, but proceed with the FYP after locking a stronger experimental design.

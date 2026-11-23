@@ -1,0 +1,11 @@
+# Keep active source and documentation line endings normalized in commits.
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.cff text eol=lf
+
+# Preserve archived historical evidence byte-for-byte in Git. This rule must
+# follow the general file-type rules because the last matching attribute wins.
+research_archive/** -text
+
